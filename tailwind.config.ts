@@ -1,27 +1,8 @@
-const orange = '#dd890b';
-//gray
-const brightGray = '#FAFCFC';
-const gray = '#D9D9D9';
+const black = '#000000';
 
-//green
-const green = '#29793D';
-
-//bronze
-const lightBronze = '#FFF6EE';
-const bronze = '#AA8554';
-
-//red
-const lightRed = '#F4F6FF';
-const red = '#c04c3d';
-const darkRed = '#C0645F';
-
-//blue
-const lightBlue = '#F4F6FF';
-const blue = '#3C82F6';
-
-//Almost black
-const dark = '#252525';
-const text = '#363636';
+const gray = '#BEC0C1';
+const grayDark = '#494B50';
+const grayMedium = '#9BA3AF';
 
 module.exports = {
 	content: [
@@ -32,38 +13,26 @@ module.exports = {
 	theme: {
 		extend: {
 			fontFamily: {
-				inter: ['Inter', 'san-serif']
+				circular: ['Circular', 'Inter', 'san-serif']
 			},
 			colors: {
-				orange: {
-					DEFAULT: orange
-				},
-				green: {
-					DEFAULT: green
+				black: {
+					DEFAULT: black
 				},
 				gray: {
 					DEFAULT: gray,
-					bright: brightGray
-				},
-				red: {
-					DEFAULT: red,
-					dark: darkRed,
-					background: lightRed
-				},
-				blue: {
-					DEFAULT: blue,
-					background: lightBlue
-				},
-				text: {
-					DEFAULT: text
-				},
-				bronze: {
-					DEFAULT: bronze,
-					light: lightBronze
-				},
-				black: {
-					DEFAULT: dark
+					dark: grayDark,
+					medium: grayMedium
 				}
+			},
+			screens: {
+				xs: '320px',
+				sm: '640px',
+				md: '768px',
+				mm: '970px',
+				lg: '1024px',
+				xl: '1280px',
+				'2xl': '1536px'
 			}
 		}
 	},
