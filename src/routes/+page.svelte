@@ -58,13 +58,13 @@
 				return {
 					id: pkg.id,
 					name: pkg.name.trim(),
-					price: pkg.price,
+					price: pkg.price_with_vat,
 					sessionCount
 				};
 			});
 
 			trainingPackageOptions = trainingPackages.map(
-				(pkg) => `${pkg.name} - ${formatPrice(pkg.price)} kr`
+				(pkg) => `${pkg.name} - ${formatPrice(pkg.price_with_vat)} kr`
 			);
 		} catch (error) {
 			console.error('Error fetching training packages:', error);
@@ -191,7 +191,7 @@
 		const sessionCountMatch = pkg.name.match(/(\d+)/);
 		const sessionCount = sessionCountMatch ? parseInt(sessionCountMatch[1]) : 1;
 
-		const pricePerSession = pkg.price / sessionCount;
+		const pricePerSession = pkg.price_with_vat / sessionCount;
 
 		return pricePerSession;
 	}
@@ -402,11 +402,11 @@
 
 		<h2 class="pb-2 pt-4 text-xl font-semibold">Träningspaket &amp; Betalningsalternativ</h2>
 		<div class="flex flex-col gap-2">
-			<h3>Prislista 2025</h3>
+			<h3>Prislista 2025 (ink. moms)</h3>
 			<ul>
 				{#each data.packages as pkg}
 					<li>
-						{pkg.name} - {formatPrice(pkg.price)}kr
+						{pkg.name} - {formatPrice(pkg.price_with_vat)}kr
 						<span class="text-gray-500">
 							= {formatPrice(getPricePerSession(pkg))}kr/träningstillfälle</span
 						>
@@ -419,7 +419,7 @@
 				id="training-package"
 				label="Träningspaket"
 				bind:selectedValue={selectedTrainingPackage}
-				options={data.packages.map((pkg) => `${pkg.name} - ${formatPrice(pkg.price)}kr`)}
+				options={data.packages.map((pkg) => `${pkg.name} - ${formatPrice(pkg.price_with_vat)}kr`)}
 				on:change={handleTrainingPackageChange}
 				{errors}
 			/>

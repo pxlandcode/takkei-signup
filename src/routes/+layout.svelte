@@ -12,12 +12,12 @@
 			lines: ['En timme i veckan', 'Hela kroppen', 'Repetera']
 		},
 		{
-			image: '/images/sand-wall.png',
-			lines: ['Något annat budskap', 'Fler rader här', '…']
+			image: '/images/leaves.png',
+			lines: ['Kontinuitet är nyckeln', 'till träningsframgång']
 		},
 		{
-			image: '/images/leaves.png',
-			lines: ['Tredje bildens text', '…', '…']
+			image: '/images/sand-wall.png',
+			lines: ['Smärtfri', 'Smidig', 'Stark', 'Snabb', '(Snygg)']
 		}
 	];
 

@@ -5,7 +5,7 @@
 	export let label: string = '';
 	export let name: string = '';
 	export let checked: boolean = false;
-	export let errors: Record<string, string> = {}; // Same as inputs
+	export let errors: Record<string, string> = {};
 
 	const dispatch = createEventDispatcher();
 

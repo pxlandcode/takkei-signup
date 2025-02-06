@@ -3,14 +3,12 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
 	try {
-		// Fetch active training packages, excluding those starting with 'MF'
 		const packages = await query(`
-			SELECT id, name, price, sessions, validity_start_date, validity_end_date
-			FROM articles
-			WHERE active = true
-			AND name NOT LIKE 'MF%'
-            AND name NOT LIKE 'Present%' 
-			ORDER BY name ASC
+			SELECT id, name, price, price * 1.06 AS price_with_vat, sessions, validity_start_date, validity_end_date
+            FROM articles
+            WHERE active = true
+            AND (name LIKE '12%' OR name LIKE '24%' OR name LIKE '48%')
+            ORDER BY name ASC;
 		`);
 
 		return { packages };
