@@ -4,6 +4,7 @@
 	import SlideShow from '../components/slideshow/SlideShow.svelte';
 	import '../app.css';
 	import Button from '../components/button/Button.svelte';
+	import LoadingOverlay from '../components/ui/loadingOverlay/LoadingOverlay.svelte';
 
 	let slides = [
 		{
@@ -21,7 +22,7 @@
 	];
 
 	function goToTakkeiWebsite() {
-		window.open('https://www.takkeitraining.com/', '_blank');
+		window.open('https://www.takkeitraining.com/', '_self');
 	}
 </script>
 
@@ -46,4 +47,6 @@
 			<slot />
 		</div>
 	</main>
+
+	<LoadingOverlay />
 </ParaglideJS>

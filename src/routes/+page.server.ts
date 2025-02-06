@@ -8,7 +8,8 @@ export const load: PageServerLoad = async () => {
 			SELECT id, name, price, sessions, validity_start_date, validity_end_date
 			FROM articles
 			WHERE active = true
-			AND name NOT LIKE 'MF%' 
+			AND name NOT LIKE 'MF%'
+            AND name NOT LIKE 'Present%' 
 			ORDER BY name ASC
 		`);
 
