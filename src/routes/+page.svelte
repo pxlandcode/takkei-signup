@@ -51,7 +51,6 @@
 		try {
 			const res = await fetch('/api/training-packages');
 			const fetchedData = await res.json();
-			console.log('fetchedData', fetchedData);
 
 			trainingPackages = fetchedData.packages.map((pkg) => {
 				const sessionCount = extractSessionCount(pkg.name);
@@ -132,7 +131,6 @@
 			installmentsCount: selectedInstallment.value
 		};
 
-		console.log('payload', payload);
 		try {
 			const res = await fetch('/api/signup', {
 				method: 'POST',
@@ -152,7 +150,6 @@
 				done: false
 			});
 
-			console.log('responseEvent', responseEvent);
 			submissionComplete = true;
 			loadingStore.loading(false);
 		} catch (error) {

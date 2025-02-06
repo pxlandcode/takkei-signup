@@ -30,8 +30,6 @@ export async function POST({ request }) {
 		if (selectedTrainingPackage) {
 			extractedPackageName = selectedTrainingPackage.split(' - ')[0].trim();
 		}
-		console.log('selectedTrainingPackage', selectedTrainingPackage);
-		console.log('extractedPackageName', extractedPackageName);
 
 		// 1. Create customer (payer)
 		const customerResult = await query(

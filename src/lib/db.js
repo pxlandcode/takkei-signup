@@ -29,7 +29,6 @@ export const query = async (text, params) => {
 (async () => {
 	try {
 		const res = await query('SELECT NOW()');
-		console.log('✅ Connected to Database at:', res[0].now);
 	} catch (err) {
 		console.error('❌ Database Connection Failed:', err);
 	}
