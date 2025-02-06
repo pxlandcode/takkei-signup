@@ -11,6 +11,8 @@ import IconUpcomingMeeting from './IconUpcomingMeeting.svelte';
 import IconDumbbell from './IconDumbbell.svelte';
 import IconGymnastics from './IconGymnastics.svelte';
 import IconBuilding from './IconBuilding.svelte';
+import IconArrowDown from './IconArrowDown.svelte';
+import IconCircleInfo from './IconCircleInfo.svelte';
 
 export {
 	IconClose,
@@ -25,5 +27,7 @@ export {
 	IconUpcomingMeeting,
 	IconDumbbell,
 	IconGymnastics,
-	IconBuilding
+	IconBuilding,
+	IconArrowDown,
+	IconCircleInfo
 };
