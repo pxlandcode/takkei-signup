@@ -27,7 +27,7 @@
 </script>
 
 <ParaglideJS {i18n}>
-	<main class="flex h-screen bg-black">
+	<main class="flex h-dvh bg-black">
 		<!-- LEFT SIDE: slideshow background & top bar -->
 		<div
 			class="relative m-5 hidden max-w-4xl flex-1 gap-5 overflow-hidden rounded-xl bg-black text-white mm:block"
