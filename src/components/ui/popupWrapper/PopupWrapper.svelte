@@ -45,7 +45,7 @@
 			<div class="header flex items-center justify-between border-b-2 pb-2">
 				<div class="flex items-center gap-2">
 					{#if icon}
-						<div class="bg-text flex h-7 w-7 items-center justify-center rounded-full text-white">
+						<div class="bg-text flex h-7 w-7 items-center justify-center rounded-full text-black">
 							<Icon {icon} size="14px" />
 						</div>
 					{/if}
