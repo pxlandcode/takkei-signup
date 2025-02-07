@@ -20,7 +20,7 @@
         ${type === 'primary' ? 'bg-black text-white hover:bg-gray-800' : ''}
         ${type === 'secondary' ? 'bg-gray-600 text-white hover:bg-gray-500' : ''}
         ${type === 'cancel' ? 'bg-red-600 text-white hover:bg-red-500' : ''}
-        ${transparent ? 'bg-transparent text-gray-400 shadow-none hover:text-white' : ''}
+        ${transparent ? 'bg-transparent text-gray shadow-none hover:text-white' : ''}
         ${transparent && type === 'cancel' ? 'hover:text-red-500' : ''}
         h-12 w-12
         ${small ? 'h-8 w-8' : ''}

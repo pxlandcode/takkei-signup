@@ -145,7 +145,9 @@ export async function POST({ request }) {
 				clientId,
 				customerId,
 				packageId,
-				trainingPackage: selectedTrainingPackage || null
+				trainingPackage: selectedTrainingPackage || null,
+				clientName: `${firstname} ${lastname}`,
+				email
 			}),
 			{ status: 201 }
 		);

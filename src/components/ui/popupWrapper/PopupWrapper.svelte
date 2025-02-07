@@ -53,7 +53,7 @@
 				</div>
 				<IconButton on:click={onClose} size="18px" icon="Close" transparent />
 			</div>
-			<div class="popup-scroll max-h-[80vh] overflow-y-scroll p-4">
+			<div class="popup-scroll max-h-[80dvh] overflow-y-scroll p-4">
 				<slot />
 			</div>
 		</div>

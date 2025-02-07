@@ -104,6 +104,15 @@
 		loadingStore.loading(true, 'Skickar din information till våra tränare...');
 		if (!validateForm()) {
 			loadingStore.loading(false);
+
+			const firstErrorKey = Object.keys(errors)[0];
+			if (firstErrorKey) {
+				const errorElement = document.getElementById(firstErrorKey);
+				console.log('errorElement', errorElement);
+				if (errorElement) {
+					errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+				}
+			}
 			return;
 		}
 
@@ -143,7 +152,7 @@
 			const responseEvent = await createEvent({
 				name: `Ny klient med ID ${responseData.clientId} registrerad via formuläret`,
 				user_ids: [2, 19],
-				description: `En ny klient har skapats via formuläret.\nKlient ID: ${responseData.clientId}\nKund ID: ${responseData.customerId}\nPaket ID: ${responseData.packageId || 'N/A'}`,
+				description: `En ny klient har skapats via formuläret.\nKlient: ${responseData.clientName}\nKlientens email: ${responseData.email}\nKlient ID: ${responseData.clientId}\nKund ID: ${responseData.customerId}\nPaket ID: ${responseData.packageId || 'N/A'}`,
 				start_time: new Date().toISOString(),
 				end_time: new Date().toISOString(),
 				active: true,

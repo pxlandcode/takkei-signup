@@ -7,7 +7,7 @@
 
 <button
 	{type}
-	class={`rounded-full bg-gray/40 px-3 py-2 text-sm transition-all duration-200 hover:bg-gray/60 ${extraClasses}`}
+	class={`rounded-sm bg-gray/40 px-3 py-2 text-sm transition-all duration-200 hover:bg-gray/60 sm:rounded-full ${extraClasses}`}
 	on:click={() => onClick?.()}
 	{disabled}
 >

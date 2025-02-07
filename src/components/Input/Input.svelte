@@ -31,8 +31,7 @@
 			transition-colors
 			duration-150
 			focus:outline-none
-			{errors[name] ? 'border-red-500' : 'border-gray-300 focus:border-gray-500'}
-		"
+			{errors[name] ? 'border-red-500' : 'border-gray-300 focus:border-gray-500'}"
 		{placeholder}
 		bind:value
 	/>
