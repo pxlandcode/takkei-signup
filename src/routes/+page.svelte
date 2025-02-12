@@ -26,7 +26,7 @@
 	let agreeToPrivacy = false;
 
 	let selectedTrainingPackage = '';
-	let selectedPaymentMethod = '';
+	let autogiro = false;
 
 	let isOtherPaymentAddress = false;
 	let payerName = '';
@@ -40,7 +40,12 @@
 	let trainingPackages = [];
 	let trainingPackageOptions = [];
 	let paymentInstallmentOptions = [{ value: 1, label: '1 delbetalning' }];
+	let autogiroOptions = [
+		{ value: false, label: 'E-postfaktura' },
+		{ value: true, label: 'Autogiro' }
+	];
 	let selectedInstallment = paymentInstallmentOptions[0];
+	let selectedAutogiro = autogiroOptions[0];
 
 	let errors = {};
 
@@ -83,7 +88,7 @@
 		agreeToPrivacy = false;
 
 		selectedTrainingPackage = '';
-		selectedPaymentMethod = '';
+		autogiro = false;
 		isOtherPaymentAddress = false;
 		payerName = '';
 		payerEmail = '';
@@ -94,7 +99,9 @@
 		payerInvoiceCity = '';
 
 		paymentInstallmentOptions = [{ value: 1, label: '1 delbetalning' }];
+
 		selectedInstallment = paymentInstallmentOptions[0];
+		selectedAutogiro = autogiroOptions[0];
 		errors = {};
 
 		submissionComplete = false;
@@ -128,7 +135,7 @@
 			agreeToTerms,
 			agreeToPrivacy,
 			selectedTrainingPackage,
-			selectedPaymentMethod,
+			autogiro,
 			paymentChoice: isOtherPaymentAddress ? 'company' : 'self',
 			payerName: isOtherPaymentAddress ? payerName : `${firstname} ${lastname}`,
 			payerEmail: isOtherPaymentAddress ? payerEmail : email,
@@ -316,7 +323,16 @@
 	<div class="flex h-full flex-col items-center justify-center">
 		<h1 class="text-2xl font-semibold">Tack för din information!</h1>
 		<p class="mb-4 text-sm">Vi ser fram emot att träna med dig.</p>
-
+		{#if autogiro}
+			<p class="mb-4">
+				<a
+					href="https://www.mvh.bgonline.se/mandate/9e127c16-516e-4e10-8df9-6db1bc6cad01"
+					class="text-orange-500 hover:text-orange-600"
+				>
+					Klicka här för att fylla i dina uppgifter för autogiro.
+				</a>
+			</p>
+		{/if}
 		<div class="w-full max-w-md rounded-lg p-4 shadow-md">
 			<h2 class="mb-2 text-lg font-semibold">Din kvittens</h2>
 			<p><strong>Namn:</strong> {firstname} {lastname}</p>
@@ -450,6 +466,20 @@
 						))}
 				/>
 			{/if}
+			<div class="flex flex-row justify-between">
+				<p class="pt-4">Välj betalningsalternativ</p>
+				<InfoButton
+					info="Vid val av autogiro ber vi dig klicka på länken efter du bekräftat din beställning och fylla i dina uppgifter. Om du inte har tid idag kommer vi skicka dig en påminnelse."
+				/>
+			</div>
+
+			<OptionButton
+				options={autogiroOptions}
+				bind:selectedOption={selectedAutogiro}
+				on:select={(event) => {
+					autogiro = event.detail;
+				}}
+			/>
 			<div class="flex flex-row gap-4 py-4">
 				<Checkbox
 					id="self-pay"
