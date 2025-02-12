@@ -22,7 +22,7 @@ export async function POST({ request }) {
 			payerInvoiceZip,
 			payerInvoiceCity,
 			selectedTrainingPackage,
-			selectedPaymentMethod,
+			autogiro,
 			installmentsCount = 1
 		} = data;
 
@@ -118,7 +118,7 @@ export async function POST({ request }) {
                     INSERT INTO packages 
                     (customer_id, article_id, client_id, paid_price, first_payment_date, autogiro, 
                     payment_installments, payment_installments_per_date, invoice_numbers, created_at, updated_at)
-                    VALUES ($1, $2, $3, $4, $5, true, $6, $7, $8, NOW(), NOW())
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
                     RETURNING id
                     `,
 					[
@@ -127,6 +127,7 @@ export async function POST({ request }) {
 						clientId,
 						totalPrice,
 						firstPaymentDate,
+						autogiro,
 						`{${installments.length}}`,
 						paymentInstallmentsPerDate,
 						formattedInvoiceNumbers
