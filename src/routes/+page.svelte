@@ -27,6 +27,7 @@
 
 	let selectedTrainingPackage = '';
 	let autogiro = false;
+	let existingPackage = false;
 
 	let isOtherPaymentAddress = false;
 	let payerName = '';
@@ -46,6 +47,7 @@
 	];
 	let selectedInstallment = paymentInstallmentOptions[0];
 	let selectedAutogiro = autogiroOptions[0];
+	let existingPackageOwner = '';
 
 	let errors = {};
 
@@ -105,6 +107,8 @@
 		errors = {};
 
 		submissionComplete = false;
+		existingPackage = false;
+		existingPackageOwner = '';
 	}
 
 	async function handleSubmit() {
@@ -134,17 +138,26 @@
 			city,
 			agreeToTerms,
 			agreeToPrivacy,
-			selectedTrainingPackage,
-			autogiro,
+			existingPackage,
+			selectedTrainingPackage: existingPackage ? null : selectedTrainingPackage,
+			autogiro: existingPackage ? null : autogiro,
 			paymentChoice: isOtherPaymentAddress ? 'company' : 'self',
-			payerName: isOtherPaymentAddress ? payerName : `${firstname} ${lastname}`,
-			payerEmail: isOtherPaymentAddress ? payerEmail : email,
-			payerPhone: isOtherPaymentAddress ? payerPhone : phone,
-			payerOrganizationNumber: isOtherPaymentAddress ? payerOrganizationNumber : '',
-			payerInvoiceAddress: isOtherPaymentAddress ? payerInvoiceAddress : streetAddress,
-			payerInvoiceZip: isOtherPaymentAddress ? payerInvoiceZip : zip,
-			payerInvoiceCity: isOtherPaymentAddress ? payerInvoiceCity : city,
-			installmentsCount: selectedInstallment.value
+			payerName: isOtherPaymentAddress
+				? payerName
+				: existingPackage
+					? null
+					: `${firstname} ${lastname}`,
+			payerEmail: isOtherPaymentAddress ? payerEmail : existingPackage ? null : email,
+			payerPhone: isOtherPaymentAddress ? payerPhone : existingPackage ? null : phone,
+			payerOrganizationNumber: isOtherPaymentAddress ? payerOrganizationNumber : null,
+			payerInvoiceAddress: isOtherPaymentAddress
+				? payerInvoiceAddress
+				: existingPackage
+					? null
+					: streetAddress,
+			payerInvoiceZip: isOtherPaymentAddress ? payerInvoiceZip : existingPackage ? null : zip,
+			payerInvoiceCity: isOtherPaymentAddress ? payerInvoiceCity : existingPackage ? null : city,
+			installmentsCount: existingPackage ? null : selectedInstallment.value
 		};
 
 		try {
@@ -156,10 +169,12 @@
 
 			const responseData = await res.json();
 
+			let description = `En ny klient har skapats via formuläret.\nKlient: ${responseData.clientName}\nKlientens email: ${responseData.email}\nKlient ID: ${responseData.clientId}\n${existingPackage ? `Klienten ska träna på befintligt paket som ägs av ${existingPackageOwner}` : `Kund ID: ${responseData.customerId}\nPaket ID: ${responseData.packageId}`}`;
+
 			const responseEvent = await createEvent({
 				name: `Ny klient med ID ${responseData.clientId} registrerad via formuläret`,
 				user_ids: [2, 19],
-				description: `En ny klient har skapats via formuläret.\nKlient: ${responseData.clientName}\nKlientens email: ${responseData.email}\nKlient ID: ${responseData.clientId}\nKund ID: ${responseData.customerId}\nPaket ID: ${responseData.packageId || 'N/A'}`,
+				description,
 				start_time: new Date().toISOString(),
 				end_time: new Date().toISOString(),
 				active: true,
@@ -183,6 +198,10 @@
 	}
 	function handleTermsAcceptanceChange(value: boolean) {
 		agreeToTerms = value;
+	}
+
+	function handleExistingPackageChange(value: boolean) {
+		existingPackage = value;
 	}
 
 	function handlePersonalDataAcceptanceChange(value: boolean) {
@@ -273,10 +292,6 @@
 			errors.city = 'Ort är obligatorisk';
 			isValid = false;
 		}
-		if (!selectedTrainingPackage) {
-			errors['training-package'] = 'Välj ett träningspaket';
-			isValid = false;
-		}
 		if (!agreeToTerms) {
 			errors['accept-terms'] = 'Du måste godkänna villkoren';
 			isValid = false;
@@ -286,7 +301,27 @@
 			isValid = false;
 		}
 
-		if (isOtherPaymentAddress) {
+		// Skip checking these if `existingPackage` is true
+		if (!existingPackage) {
+			if (!selectedTrainingPackage) {
+				errors['training-package'] = 'Välj ett träningspaket';
+				isValid = false;
+			}
+			if (!selectedInstallment) {
+				errors['payment-installment'] = 'Välj en delbetalning';
+				isValid = false;
+			}
+		}
+
+		if (existingPackage) {
+			if (!existingPackageOwner) {
+				errors['existing-package-owner'] = 'Fyll i ägaren av det befintliga paketet';
+				isValid = false;
+			}
+		}
+
+		// Skip payer details validation if `existingPackage` is true
+		if (isOtherPaymentAddress && !existingPackage) {
 			if (!payerName) (errors.payerName = 'Företagsnamn/Namn är obligatoriskt'), (isValid = false);
 			if (!payerEmail || !/\S+@\S+\.\S+/.test(payerEmail))
 				(errors.payerEmail = 'Ogiltig e-postadress'), (isValid = false);
@@ -300,9 +335,9 @@
 				(errors.payerInvoiceZip = 'Ogiltigt postnummer'), (isValid = false);
 			if (!payerInvoiceCity) (errors.payerInvoiceCity = 'Ort är obligatorisk'), (isValid = false);
 		}
+
 		return isValid;
 	}
-
 	let isPopupOpen = false;
 	let popupHeader = '';
 	let popupContent = '';
@@ -338,8 +373,12 @@
 			<p><strong>Namn:</strong> {firstname} {lastname}</p>
 			<p><strong>E-post:</strong> {email}</p>
 			<p><strong>Telefon:</strong> {phone}</p>
-			<p><strong>Träningspaket:</strong> {selectedTrainingPackage || 'Ej valt'}</p>
-			<p><strong>Delbetalningar:</strong> {selectedInstallment.label}</p>
+			{#if !existingPackage}
+				<p><strong>Träningspaket:</strong> {selectedTrainingPackage || 'Ej valt'}</p>
+				<p><strong>Delbetalningar:</strong> {selectedInstallment.label}</p>
+			{:else}
+				<p><strong>Ska träna på befintligt paket som ägs av:</strong> {existingPackageOwner}</p>
+			{/if}
 
 			{#if isOtherPaymentAddress}
 				<h3 class="text-md mt-3 font-semibold">Betalningsinformation</h3>
@@ -423,131 +462,163 @@
 		</div>
 
 		<h2 class="pb-2 pt-4 text-xl font-semibold">Träningspaket &amp; Betalningsalternativ</h2>
-		<div class="flex flex-col gap-2">
-			<h3>Prislista 2025 (ink. moms)</h3>
-			<ul>
-				{#each data.packages as pkg}
-					<li>
-						{pkg.name} - {formatPrice(pkg.price_with_vat)}kr
-						<span class="text-gray-500">
-							= {formatPrice(getPricePerSession(pkg))}kr/träningstillfälle</span
-						>
-					</li>
-				{/each}
-			</ul>
-		</div>
-		<div class="flex flex-row items-center gap-2 pt-4">
-			<Dropdown
-				id="training-package"
-				label="Träningspaket"
-				bind:selectedValue={selectedTrainingPackage}
-				options={data.packages.map((pkg) => `${pkg.name} - ${formatPrice(pkg.price_with_vat)}kr`)}
-				on:change={handleTrainingPackageChange}
-				{errors}
+		<div class="flex flex-row gap-4 py-4">
+			<Checkbox
+				id="self-pay"
+				label="Jag ska träna på ett befintligt paket"
+				name="payment-choice"
+				checked={existingPackage}
+				on:change={(e) => handleExistingPackageChange(e.detail.checked)}
 			/>
-			<div class="mt-7">
-				<InfoButton
-					info="Ett träningspaket fungerar som ett klippkort, skulle du betala allt på en gång så finns träningarna tillgodo tills de nyttjas. Alternativt delbetala månadsvis utifrån ett förutbestämt antal delbetalningar."
-				/>
-			</div>
+			<InfoButton
+				info="Välj detta alternativ om det redan finns ett befintligt träningspaket du ska träna på. Om exempelvis en familjemedlem eller ditt företag redan betalar för ett paket."
+			/>
 		</div>
 
-		<h3 class="pt-4">Betalningsalternativ</h3>
-
-		<div class="flex flex-col gap-4">
-			{#if paymentInstallmentOptions.length > 1}
-				<p class="pt-4">Välj antal delbetalningar</p>
-				<OptionButton
-					options={paymentInstallmentOptions}
-					bind:selectedOption={selectedInstallment}
-					on:select={(event) =>
-						(selectedInstallment = paymentInstallmentOptions.find(
-							(opt) => opt.value === event.detail
-						))}
-				/>
-			{/if}
-			<div class="flex flex-row justify-between">
-				<p class="pt-4">Välj betalningsalternativ</p>
-				<InfoButton
-					info="Vid val av autogiro ber vi dig klicka på länken efter du bekräftat din beställning och fylla i dina uppgifter. Om du inte har tid idag kommer vi skicka dig en påminnelse."
-				/>
-			</div>
-
-			<OptionButton
-				options={autogiroOptions}
-				bind:selectedOption={selectedAutogiro}
-				on:select={(event) => {
-					autogiro = event.detail;
-				}}
-			/>
+		{#if existingPackage}
 			<div class="flex flex-row gap-4 py-4">
-				<Checkbox
-					id="self-pay"
-					label="Annan faktureringsadress"
-					name="payment-choice"
-					checked={isOtherPaymentAddress}
-					on:change={(e) => handlePaymentChoiceChange(e.detail.checked)}
+				<Input
+					label="Det befintliga paketets ägare"
+					name="existing-package-owner"
+					bind:value={existingPackageOwner}
+					placeholder="Namn/företag"
+					{errors}
 				/>
-				<InfoButton info="Välj om fakturan ska betalas av ett företag eller någon annan än dig." />
+				<div class="mt-7">
+					<InfoButton
+						info="Fyll i namnet på den person eller det företag som betalar för det befintliga paketet."
+					/>
+				</div>
 			</div>
-		</div>
+		{:else}
+			<div class="flex flex-col gap-2">
+				<h3>Prislista 2025 (ink. moms)</h3>
+				<ul>
+					{#each data.packages as pkg}
+						<li>
+							{pkg.name} - {formatPrice(pkg.price_with_vat)}kr
+							<span class="text-gray-500">
+								= {formatPrice(getPricePerSession(pkg))}kr/träningstillfälle</span
+							>
+						</li>
+					{/each}
+				</ul>
+			</div>
+			<div class="flex flex-row items-center gap-2 pt-4">
+				<Dropdown
+					id="training-package"
+					label="Träningspaket"
+					bind:selectedValue={selectedTrainingPackage}
+					options={data.packages.map((pkg) => `${pkg.name} - ${formatPrice(pkg.price_with_vat)}kr`)}
+					on:change={handleTrainingPackageChange}
+					{errors}
+				/>
+				<div class="mt-7">
+					<InfoButton
+						info="Ett träningspaket fungerar som ett klippkort, skulle du betala allt på en gång så finns träningarna tillgodo tills de nyttjas. Alternativt delbetala månadsvis utifrån ett förutbestämt antal delbetalningar."
+					/>
+				</div>
+			</div>
 
-		{#if isOtherPaymentAddress}
-			<h2 class="text-xl font-semibold">Betalare</h2>
-			<Input
-				label="Företagsnamn/Namn"
-				name="payerName"
-				bind:value={payerName}
-				placeholder="Takkei Trainingsystems AB"
-				{errors}
-			/>
-			<Input
-				label="E-post"
-				name="payerEmail"
-				bind:value={payerEmail}
-				placeholder="info@takkei.se"
-				{errors}
-			/>
-			<div class="flex flex-row gap-2">
-				<Input
-					label="Organisationsnummer"
-					name="payerOrganizationNumber"
-					bind:value={payerOrganizationNumber}
-					placeholder="xxxxxx-xxxx"
-					{errors}
+			<h3 class="pt-4">Betalningsalternativ</h3>
+
+			<div class="flex flex-col gap-4">
+				{#if paymentInstallmentOptions.length > 1}
+					<p class="pt-4">Välj antal delbetalningar</p>
+					<OptionButton
+						options={paymentInstallmentOptions}
+						bind:selectedOption={selectedInstallment}
+						on:select={(event) =>
+							(selectedInstallment = paymentInstallmentOptions.find(
+								(opt) => opt.value === event.detail
+							))}
+					/>
+				{/if}
+				<div class="flex flex-row justify-between">
+					<p class="pt-4">Välj betalningsalternativ</p>
+					<InfoButton
+						info="Vid val av autogiro ber vi dig klicka på länken efter du bekräftat din beställning och fylla i dina uppgifter. Om du inte har tid idag kommer vi skicka dig en påminnelse."
+					/>
+				</div>
+
+				<OptionButton
+					options={autogiroOptions}
+					bind:selectedOption={selectedAutogiro}
+					on:select={(event) => {
+						autogiro = event.detail;
+					}}
 				/>
-				<Input
-					label="Telefonnummer"
-					name="payerPhone"
-					bind:value={payerPhone}
-					placeholder="08xxxxxx"
-					{errors}
-				/>
+				<div class="flex flex-row gap-4 py-4">
+					<Checkbox
+						id="self-pay"
+						label="Annan faktureringsadress"
+						name="payment-choice"
+						checked={isOtherPaymentAddress}
+						on:change={(e) => handlePaymentChoiceChange(e.detail.checked)}
+					/>
+					<InfoButton
+						info="Välj om fakturan ska betalas av ett företag eller någon annan än dig."
+					/>
+				</div>
 			</div>
 
-			<Input
-				label="Fakturaadress"
-				name="payerInvoiceAddress"
-				bind:value={payerInvoiceAddress}
-				placeholder="Garvargatan 7"
-				{errors}
-			/>
-			<div class="flex space-x-2">
+			{#if isOtherPaymentAddress}
+				<h2 class="text-xl font-semibold">Betalare</h2>
 				<Input
-					label="Postnummer"
-					name="payerInvoiceZip"
-					bind:value={payerInvoiceZip}
-					placeholder="112 21"
+					label="Företagsnamn/Namn"
+					name="payerName"
+					bind:value={payerName}
+					placeholder="Takkei Trainingsystems AB"
 					{errors}
 				/>
 				<Input
-					label="Ort"
-					name="payerInvoiceCity"
-					bind:value={payerInvoiceCity}
-					placeholder="Stockholm"
+					label="E-post"
+					name="payerEmail"
+					bind:value={payerEmail}
+					placeholder="info@takkei.se"
 					{errors}
 				/>
-			</div>
+				<div class="flex flex-row gap-2">
+					<Input
+						label="Organisationsnummer"
+						name="payerOrganizationNumber"
+						bind:value={payerOrganizationNumber}
+						placeholder="xxxxxx-xxxx"
+						{errors}
+					/>
+					<Input
+						label="Telefonnummer"
+						name="payerPhone"
+						bind:value={payerPhone}
+						placeholder="08xxxxxx"
+						{errors}
+					/>
+				</div>
+
+				<Input
+					label="Fakturaadress"
+					name="payerInvoiceAddress"
+					bind:value={payerInvoiceAddress}
+					placeholder="Garvargatan 7"
+					{errors}
+				/>
+				<div class="flex space-x-2">
+					<Input
+						label="Postnummer"
+						name="payerInvoiceZip"
+						bind:value={payerInvoiceZip}
+						placeholder="112 21"
+						{errors}
+					/>
+					<Input
+						label="Ort"
+						name="payerInvoiceCity"
+						bind:value={payerInvoiceCity}
+						placeholder="Stockholm"
+						{errors}
+					/>
+				</div>
+			{/if}
 		{/if}
 
 		<div class="flex flex-col gap-4 pb-4">
