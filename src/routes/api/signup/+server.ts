@@ -23,7 +23,8 @@ export async function POST({ request }) {
 			payerInvoiceCity,
 			selectedTrainingPackage,
 			autogiro,
-			installmentsCount = 1
+			installmentsCount = 1,
+			existingPackage
 		} = data;
 
 		let extractedPackageName = '';
@@ -31,24 +32,27 @@ export async function POST({ request }) {
 			extractedPackageName = selectedTrainingPackage.split(' - ')[0].trim();
 		}
 
+		let customerId = null;
 		// 1. Create customer (payer)
-		const customerResult = await query(
-			`
+		if (!existingPackage) {
+			const customerResult = await query(
+				`
                 INSERT INTO customers (name, invoice_address, invoice_zip, invoice_city, organization_number, email, phone, created_at, updated_at)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
                 RETURNING id
             `,
-			[
-				payerName,
-				payerInvoiceAddress || streetAddress,
-				payerInvoiceZip || zip,
-				payerInvoiceCity || city,
-				payerOrganizationNumber || null,
-				payerEmail,
-				payerPhone
-			]
-		);
-		const customerId = customerResult[0].id;
+				[
+					payerName,
+					payerInvoiceAddress || streetAddress,
+					payerInvoiceZip || zip,
+					payerInvoiceCity || city,
+					payerOrganizationNumber || null,
+					payerEmail,
+					payerPhone
+				]
+			);
+			customerId = customerResult[0].id;
+		}
 
 		// 2. Create the client
 		const clientResult = await query(
@@ -63,18 +67,20 @@ export async function POST({ request }) {
 		const clientId = clientResult[0].id;
 
 		// 3. Link client & customer
-		await query(
-			`
+		if (!existingPackage) {
+			await query(
+				`
             INSERT INTO client_customer_relationships (customer_id, client_id, relationship, active, created_at, updated_at)
             VALUES ($1, $2, $3, true, NOW(), NOW())
         `,
-			[customerId, clientId, paymentChoice === 'self' ? 'self' : 'payer']
-		);
+				[customerId, clientId, paymentChoice === 'self' ? 'self' : 'payer']
+			);
+		}
 
 		// 4. Assign the training package (if provided)
 		let packageId = null;
 
-		if (selectedTrainingPackage) {
+		if (!existingPackage && selectedTrainingPackage) {
 			const articleResult = await query(
 				`SELECT id, price FROM articles WHERE TRIM(name) = TRIM($1) AND active = true`,
 				[extractedPackageName]
